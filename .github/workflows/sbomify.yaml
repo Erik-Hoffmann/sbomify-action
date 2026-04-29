@@ -1208,7 +1208,7 @@ jobs:
           COMPONENT_ID: ${{ matrix.component_id }}
           COMPONENT_NAME: ${{ matrix.component_name }}
           COMPONENT_VERSION: ${{ steps.version.outputs.version }}
-          COMPONENT_PURL: ${{ matrix.component == 'action' && format('pkg:docker/sbomify/sbomify-action@{0}?repository_url=ghcr.io', steps.version.outputs.version) || '' }}
+          COMPONENT_PURL: ${{ matrix.component == 'action' && format('pkg:docker/sbomify/sbomify-action@{0}?repository_url=ghcr.io', steps.version.outputs.docker_tag) || '' }}
           LOCK_FILE: ${{ matrix.lock_file }}
           PRODUCT_RELEASE: ${{ matrix.has_product_release && format('["{0}:{1}"]', matrix.product_release_id, steps.version.outputs.version) || '' }}
           SBOM_FORMAT: ${{ matrix.format }}
@@ -1294,7 +1294,7 @@ jobs:
           COMPONENT_ID: ${{ matrix.component_id }}
           COMPONENT_NAME: ${{ matrix.component_name }}
           COMPONENT_VERSION: ${{ steps.version.outputs.version }}
-          COMPONENT_PURL: ${{ matrix.component == 'action' && format('pkg:docker/sbomify/sbomify-action@{0}?repository_url=ghcr.io', steps.version.outputs.version) || '' }}
+          COMPONENT_PURL: ${{ matrix.component == 'action' && format('pkg:docker/sbomify/sbomify-action@{0}?repository_url=ghcr.io', steps.version.outputs.docker_tag) || '' }}
           LOCK_FILE: ${{ matrix.lock_file }}
           PRODUCT_RELEASE: ${{ matrix.has_product_release && format('["{0}:{1}"]', matrix.product_release_id, steps.version.outputs.version) || '' }}
           SBOM_FORMAT: ${{ matrix.format }}
@@ -1364,7 +1364,7 @@ jobs:
           COMPONENT_ID: ${{ matrix.component_id }}
           COMPONENT_NAME: ${{ matrix.component_name }}
           COMPONENT_VERSION: ${{ steps.version.outputs.version }}
-          COMPONENT_PURL: pkg:docker/sbomify/sbomify-action@${{ steps.version.outputs.version }}?repository_url=ghcr.io
+          COMPONENT_PURL: pkg:docker/sbomify/sbomify-action@${{ steps.version.outputs.docker_tag }}?repository_url=ghcr.io
           DOCKER_IMAGE: ghcr.io/sbomify/sbomify-action:${{ steps.version.outputs.docker_tag }}
           ADDITIONAL_PACKAGES_FILE: container_additional_packages.txt
           PRODUCT_RELEASE: ${{ matrix.has_product_release && format('["{0}:{1}"]', matrix.product_release_id, steps.version.outputs.version) || '' }}
@@ -1434,7 +1434,7 @@ jobs:
           COMPONENT_ID: ${{ matrix.component_id }}
           COMPONENT_NAME: ${{ matrix.component_name }}
           COMPONENT_VERSION: ${{ steps.version.outputs.version }}
-          COMPONENT_PURL: pkg:docker/sbomify/sbomify-action@${{ steps.version.outputs.version }}?repository_url=ghcr.io
+          COMPONENT_PURL: pkg:docker/sbomify/sbomify-action@${{ steps.version.outputs.docker_tag }}?repository_url=ghcr.io
           DOCKER_IMAGE: ghcr.io/sbomify/sbomify-action:${{ steps.version.outputs.docker_tag }}
           ADDITIONAL_PACKAGES_FILE: container_additional_packages.txt
           PRODUCT_RELEASE: ${{ matrix.has_product_release && format('["{0}:{1}"]', matrix.product_release_id, steps.version.outputs.version) || '' }}
