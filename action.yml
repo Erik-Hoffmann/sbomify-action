@@ -13,7 +13,7 @@ inputs:
 runs:
   using: 'docker'
   # Bump/pin this to release
-  image: 'docker://sbomifyhub/sbomify-action:latest'
+  image: 'docker://ghcr.io/sbomify/sbomify-action:latest'
   env:
     WORKING_DIR: ${{ inputs['working-dir'] }}
     COMPONENT_PURL: ${{ inputs['component-purl'] }}
