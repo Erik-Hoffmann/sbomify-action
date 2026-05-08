@@ -774,17 +774,20 @@ class TestIsInvalidPurl:
         assert is_invalid
         assert "root" in reason
 
-    def test_missing_version_npm(self):
-        """Test that npm packages without version are rejected."""
-        is_invalid, reason = _is_invalid_purl("pkg:npm/lodash")
-        assert is_invalid
-        assert "missing version" in reason
+    def test_missing_version_npm_allowed(self):
+        """PURLs without version are valid per the PURL spec (ECMA-427)."""
+        is_invalid, _ = _is_invalid_purl("pkg:npm/lodash")
+        assert not is_invalid
 
-    def test_missing_version_maven(self):
-        """Test that maven packages without version are rejected."""
-        is_invalid, reason = _is_invalid_purl("pkg:maven/org.apache/commons")
-        assert is_invalid
-        assert "missing version" in reason
+    def test_missing_version_maven_allowed(self):
+        """PURLs without version are valid per the PURL spec (ECMA-427)."""
+        is_invalid, _ = _is_invalid_purl("pkg:maven/org.apache/commons")
+        assert not is_invalid
+
+    def test_missing_version_pypi_allowed(self):
+        """Regression test for issue #227 — pypi PURLs without version must be preserved."""
+        is_invalid, _ = _is_invalid_purl("pkg:pypi/requests")
+        assert not is_invalid
 
     def test_empty_purl_rejected(self):
         """Test that empty PURL is rejected."""
@@ -908,12 +911,12 @@ class TestSanitizePurls:
         assert admin_ui.purl is None  # PURL cleared
         assert admin_ui.version == "1.0.0"  # Other fields preserved
 
-    def test_clears_purl_without_version(self):
-        """Test that PURLs without version are cleared but component kept."""
+    def test_preserves_purl_without_version(self):
+        """Regression test for issue #227 — version is optional per PURL spec ECMA-427."""
         from packageurl import PackageURL
 
         bom = Bom()
-        # Valid component
+        # Valid component with version
         valid_comp = Component(
             name="lodash",
             type=ComponentType.LIBRARY,
@@ -921,32 +924,32 @@ class TestSanitizePurls:
             bom_ref=BomRef("pkg:npm/lodash@4.17.21"),
             purl=PackageURL.from_string("pkg:npm/lodash@4.17.21"),
         )
-        # Component with PURL missing version
-        invalid_comp = Component(
-            name="no-version",
+        # Component with PURL missing version (still valid per spec)
+        no_version_comp = Component(
+            name="requests",
             type=ComponentType.LIBRARY,
-            version="1.0.0",  # Component has version, but PURL doesn't
-            bom_ref=BomRef("pkg:npm/no-version"),
-            purl=PackageURL.from_string("pkg:npm/no-version"),
+            version="2.31.0",
+            bom_ref=BomRef("pkg:pypi/requests"),
+            purl=PackageURL.from_string("pkg:pypi/requests"),
         )
         bom.components.add(valid_comp)
-        bom.components.add(invalid_comp)
+        bom.components.add(no_version_comp)
 
         normalized, cleared = sanitize_purls(bom)
-        assert cleared == 1
-        # Both components kept
+        assert normalized == 0
+        assert cleared == 0
         assert len(bom.components) == 2
 
-        # Find the sanitized component
-        no_version = None
+        # Find the no-version component
+        preserved = None
         for comp in bom.components:
-            if comp.name == "no-version":
-                no_version = comp
+            if comp.name == "requests":
+                preserved = comp
                 break
 
-        assert no_version is not None
-        assert no_version.purl is None  # PURL cleared
-        assert no_version.version == "1.0.0"  # Component version preserved
+        assert preserved is not None
+        assert preserved.purl is not None
+        assert str(preserved.purl) == "pkg:pypi/requests"
 
     def test_clears_invalid_metadata_component_purl(self):
         """Test that invalid PURLs are cleared from metadata component."""
@@ -1017,13 +1020,18 @@ class TestSanitizePurls:
             bom_ref=BomRef("pkg:npm/parent@1.0.0"),
             purl=PackageURL.from_string("pkg:npm/parent@1.0.0"),
         )
-        # Child component (invalid PURL - missing version)
+        # Child component (invalid PURL - file: reference in qualifier)
         child = Component(
             name="child",
             type=ComponentType.LIBRARY,
             version="2.0.0",
-            bom_ref=BomRef("pkg:npm/child"),
-            purl=PackageURL.from_string("pkg:npm/child"),
+            bom_ref=BomRef("pkg:npm/child@2.0.0"),
+            purl=PackageURL(
+                type="npm",
+                name="child",
+                version="2.0.0",
+                qualifiers={"vcs_url": "file:packages/child"},
+            ),
         )
         bom.components.add(parent)
         bom.components.add(child)
@@ -1082,12 +1090,17 @@ class TestSanitizePurls:
         valid_tool.group = "aquasecurity"
         bom.metadata.tools.components.add(valid_tool)
 
-        # Add a tool component with invalid PURL (missing version)
+        # Add a tool component with invalid PURL (file: reference)
         invalid_tool = Component(
             name="cdxgen",
             type=ComponentType.APPLICATION,
-            version="11.0.0",  # Component has version, but PURL doesn't
-            purl=PackageURL.from_string("pkg:npm/cdxgen"),
+            version="11.0.0",
+            purl=PackageURL(
+                type="npm",
+                name="cdxgen",
+                version="11.0.0",
+                qualifiers={"vcs_url": "file:tools/cdxgen"},
+            ),
         )
         bom.metadata.tools.components.add(invalid_tool)
 

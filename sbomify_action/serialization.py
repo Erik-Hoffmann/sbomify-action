@@ -150,20 +150,6 @@ def _extract_component_info_from_purl(
 _DOUBLE_ENCODED_AT_PATTERN = re.compile(r"(%40){2,}")  # %40%40... → %40
 _DOUBLE_AT_PATTERN = re.compile(r"@@+")  # @@... → @
 
-# Package types that require a version in the PURL
-# These ecosystems always have versioned packages in standard usage
-PURL_TYPES_REQUIRING_VERSION = frozenset(
-    {
-        "npm",  # JavaScript/Node.js
-        "maven",  # Java
-        "pypi",  # Python
-        "cargo",  # Rust
-        "gem",  # Ruby
-        "golang",  # Go
-        "nuget",  # .NET
-    }
-)
-
 
 def normalize_purl(purl_str: str | None) -> tuple[str | None, bool]:
     """
@@ -215,9 +201,11 @@ def _is_invalid_purl(purl_str: str | None) -> tuple[bool, str]:
     - PURLs with file: references in qualifiers (local workspace packages)
     - PURLs with path-based versions (e.g., @../../packages/foo)
     - PURLs with link: references (npm link)
-    - PURLs missing version (except for certain ecosystems where this is acceptable)
 
     Note: Double @@ encoding issues are fixed by normalize_purl() rather than rejected.
+    Per the PURL spec (ECMA-427), the version component is optional, so PURLs
+    without versions are treated as valid (i.e. not rejected here). They may
+    still be normalized by normalize_purl() if they contain encoding bugs.
 
     Args:
         purl_str: The PURL string to check (may be None or empty)
@@ -254,11 +242,6 @@ def _is_invalid_purl(purl_str: str | None) -> tuple[bool, str]:
             for key, value in purl.qualifiers.items():
                 if isinstance(value, str) and ("file:" in value or "link:" in value):
                     return True, f"qualifier '{key}' contains file:/link: reference"
-
-        # Check for missing version in ecosystems that require it
-        if purl.type in PURL_TYPES_REQUIRING_VERSION:
-            if not purl.version:
-                return True, f"missing version for {purl.type} package"
 
     except ValueError as e:
         return True, f"malformed PURL: {e}"
