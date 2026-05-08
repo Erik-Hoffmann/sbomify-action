@@ -204,7 +204,8 @@ def _is_invalid_purl(purl_str: str | None) -> tuple[bool, str]:
 
     Note: Double @@ encoding issues are fixed by normalize_purl() rather than rejected.
     Per the PURL spec (ECMA-427), the version component is optional, so PURLs
-    without versions are preserved unmodified.
+    without versions are treated as valid (i.e. not rejected here). They may
+    still be normalized by normalize_purl() if they contain encoding bugs.
 
     Args:
         purl_str: The PURL string to check (may be None or empty)
