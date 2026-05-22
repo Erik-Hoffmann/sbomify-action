@@ -11,6 +11,11 @@ Configuration via environment variables (DTRACK_* prefix):
                     - https://proxy.example.com/dtrack/api (reverse proxy)
     DTRACK_PROJECT_ID: UUID of the project to upload to (optional if using name+version)
     DTRACK_AUTO_CREATE: Auto-create project if it doesn't exist (default: false)
+    DTRACK_PROJECT_TAGS: Tags to add to the project (comma seperated)
+    DTRACK_PARENT_ID: UUID of the parent project
+    DTRACK_PARENT_NAME: Name of the parent project
+    DTRACK_PARENT_VERSION: Version of the parent project
+    DTRACK_IS_LATEST: Mark the uploaded BOM as the latest version
 
 Note: Project name and version come from the global COMPONENT_NAME and COMPONENT_VERSION
 environment variables, not from DTRACK_* prefixed variables.
@@ -19,7 +24,7 @@ environment variables, not from DTRACK_* prefixed variables.
 import base64
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import requests
 
@@ -57,6 +62,11 @@ class DependencyTrackConfig(DestinationConfig):
     api_url: str  # Full API base URL, we append /v1/bom
     project_id: Optional[str] = None
     auto_create: bool = False
+    project_tags: List[dict] = None
+    parent_id: Optional[str] = None
+    parent_name: Optional[str] = None
+    parent_version: Optional[str] = None
+    is_latest: bool = False
 
     @classmethod
     def from_env(cls) -> Optional["DependencyTrackConfig"]:
@@ -68,6 +78,11 @@ class DependencyTrackConfig(DestinationConfig):
         if not api_key or not api_url:
             return None
 
+        # map list of tags to list[dict{name: tag}]
+        _project_tags = list(map(
+            lambda t: {"name": t}, cls._get_env_list("PROJECT_TAGS")
+        ))
+
         return cls(
             api_key=api_key,
             api_url=api_url.rstrip(
@@ -75,6 +90,11 @@ class DependencyTrackConfig(DestinationConfig):
             ),  # Only strip trailing "/" so custom paths like /api or /dtrack/api are preserved
             project_id=cls._get_env("PROJECT_ID"),
             auto_create=cls._get_env_bool("AUTO_CREATE", default=False),
+            project_tags=_project_tags,
+            parent_id=cls._get_env("PARENT_ID"),
+            parent_name=cls._get_env("PARENT_NAME"),
+            parent_version=cls._get_env("PARENT_VERSION"),
+            is_latest=cls._get_env_bool("IS_LATEST", default=False)
         )
 
     def is_configured(self) -> bool:
@@ -103,6 +123,11 @@ class DependencyTrackDestination:
         DTRACK_API_URL: Base URL of Dependency Track (required)
         DTRACK_PROJECT_ID: UUID of the project (optional, alternative to name/version)
         DTRACK_AUTO_CREATE: Auto-create project (default: false)
+        DTRACK_PROJECT_TAGS: Tags to add to the project (optional, comma seperated)
+        DTRACK_PARENT_ID: UUID of the parent project (optional)
+        DTRACK_PARENT_NAME: Name of the parent project (optional)
+        DTRACK_PARENT_VERSION: Version of the parent project (optional)
+        DTRACK_IS_LATEST: Mark the uploaded BOM as the latest version (default: false)
     """
 
     def __init__(self, config: Optional[DependencyTrackConfig] = None):
@@ -178,6 +203,11 @@ class DependencyTrackDestination:
         payload: Dict[str, Any] = {
             "bom": bom_base64,
             "autoCreate": self._config.auto_create,
+            "projectTags": [] if self._config.project_tags is None else self._config.project_tags,
+            "parentUUID": self._config.parent_id,
+            "parentName": self._config.parent_name,
+            "parentVersion": self._config.parent_version,
+            "isLatest": self._config.is_latest
         }
 
         # Add project identifier

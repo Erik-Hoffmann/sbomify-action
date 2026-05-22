@@ -84,6 +84,13 @@ class DestinationConfig(ABC):
             return default
         return value.lower() in ("true", "yes", "1", "on")
 
+    @classmethod
+    def _get_env_list(cls, key: str, default: list = None) -> list:
+        """Get list environment variable with prefix."""
+        value = cls._get_env(key)
+        if value is None or value.strip() == "":
+            return [] if default is None else default
+        return value.split(',')
 
 class Destination(Protocol):
     """
