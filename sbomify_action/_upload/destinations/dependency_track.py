@@ -78,12 +78,7 @@ class DependencyTrackConfig(DestinationConfig):
         if not api_key or not api_url:
             return None
 
-        # map list of tags to list[dict{name: tag}]
-        _project_tags = (
-            [{"name": t} for t in cls._get_env_list("PROJECT_TAGS")]
-            if cls._get_env("PROJECT_TAGS") is not None
-            else None
-        )
+        _project_tags = cls._get_env_list("PROJECT_TAGS") if cls._get_env("PROJECT_TAGS") is not None else None
 
         return cls(
             api_key=api_key,
@@ -226,14 +221,21 @@ class DependencyTrackDestination:
 
         # add project tags if set
         if self._config.project_tags is not None:
-            payload["projectTags"] = self._config.project_tags
+            payload["projectTags"] = [{"name": t} for t in self._config.project_tags]
 
-        # ensure parent settings are coherent
         if self._config.parent_id:
             payload["parentUUID"] = self._config.parent_id
         elif self._config.parent_name and self._config.parent_version:
             payload["parentName"] = self._config.parent_name
             payload["parentVersion"] = self._config.parent_version
+        # ensure parent settings are coherent
+        elif bool(self._config.parent_name) ^ bool(self._config.parent_version):
+            return UploadResult.failure_result(
+                destination_name=self.name,
+                error_message=(
+                    "Dependency Track parent project configuration requires either DTRACK_PARENT_ID or both DTRACK_PARENT_NAME and DTRACK_PARENT_VERSION"
+                ),
+            )
 
         # Execute the upload
         try:
