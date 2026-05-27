@@ -942,7 +942,6 @@ class TestDependencyTrackDestination(unittest.TestCase):
             result = dest.upload(input)
 
             self.assertFalse(result.success)
-            print(result.error_message)
             self.assertIn("DTRACK_PARENT_ID", result.error_message)
             self.assertIn("DTRACK_PARENT_NAME", result.error_message)
             self.assertIn("DTRACK_PARENT_VERSION", result.error_message)
