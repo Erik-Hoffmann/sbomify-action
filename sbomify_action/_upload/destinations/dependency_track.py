@@ -62,7 +62,7 @@ class DependencyTrackConfig(DestinationConfig):
     api_url: str  # Full API base URL, we append /v1/bom
     project_id: Optional[str] = None
     auto_create: bool = False
-    project_tags: list[dict] | None = None
+    project_tags: list[str] | None = None
     parent_id: str = None
     parent_name: str = None
     parent_version: str = None
