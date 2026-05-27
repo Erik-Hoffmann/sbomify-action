@@ -63,9 +63,9 @@ class DependencyTrackConfig(DestinationConfig):
     project_id: Optional[str] = None
     auto_create: bool = False
     project_tags: list[dict] | None = None
-    parent_id: Optional[str] = None
-    parent_name: Optional[str] = None
-    parent_version: Optional[str] = None
+    parent_id: str = None
+    parent_name: str = None
+    parent_version: str = None
     is_latest: bool = False
 
     @classmethod
