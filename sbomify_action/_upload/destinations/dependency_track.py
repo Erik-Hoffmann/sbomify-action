@@ -11,7 +11,7 @@ Configuration via environment variables (DTRACK_* prefix):
                     - https://proxy.example.com/dtrack/api (reverse proxy)
     DTRACK_PROJECT_ID: UUID of the project to upload to (optional if using name+version)
     DTRACK_AUTO_CREATE: Auto-create project if it doesn't exist (default: false)
-    DTRACK_PROJECT_TAGS: Tags to add to the project (comma seperated)
+    DTRACK_PROJECT_TAGS: Tags to add to the project (comma separated)
     DTRACK_PARENT_ID: UUID of the parent project
     DTRACK_PARENT_NAME: Name of the parent project
     DTRACK_PARENT_VERSION: Version of the parent project
@@ -120,7 +120,7 @@ class DependencyTrackDestination:
         DTRACK_API_URL: Base URL of Dependency Track (required)
         DTRACK_PROJECT_ID: UUID of the project (optional, alternative to name/version)
         DTRACK_AUTO_CREATE: Auto-create project (default: false)
-        DTRACK_PROJECT_TAGS: Tags to add to the project (optional, comma seperated)
+        DTRACK_PROJECT_TAGS: Tags to add to the project (optional, comma separated)
         DTRACK_PARENT_ID: UUID of the parent project (optional)
         DTRACK_PARENT_NAME: Name of the parent project (optional)
         DTRACK_PARENT_VERSION: Version of the parent project (optional)
