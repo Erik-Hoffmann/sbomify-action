@@ -270,7 +270,7 @@ When uploading to Dependency Track (`UPLOAD_DESTINATIONS=dependency-track`), con
 | `DTRACK_API_URL`        | Yes      | Full API base URL (e.g., `https://dtrack.example.com/api`)               |
 | `DTRACK_PROJECT_ID`     | §        | Project UUID (alternative to using `COMPONENT_NAME`/`COMPONENT_VERSION`) |
 | `DTRACK_AUTO_CREATE`    | No       | Auto-create project if it doesn't exist (default: false)                 |
-| `DTRACK_PROJECT_TAGS`   | No       | Tags to add to the project (comma seperated)                             |
+| `DTRACK_PROJECT_TAGS`   | No       | Tags to add to the project (comma separated)                             |
 | `DTRACK_PARENT_ID`      | No       | Id of the parent project                                                 |
 | `DTRACK_PARENT_NAME`    | No       | Name of the parent project                                               |
 | `DTRACK_PARENT_VERSION` | No       | Version of the parent project                                            |
