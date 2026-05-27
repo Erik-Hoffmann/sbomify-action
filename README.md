@@ -136,7 +136,7 @@ Add business metadata without a sbomify account using a local config file:
     LOCK_FILE: requirements.txt
     OUTPUT_FILE: sbom.cdx.json
     UPLOAD: false
-    AUGMENT: true # Uses sbomify.json in project root
+    AUGMENT: true  # Uses sbomify.json in project root
     ENRICH: true
 ```
 
@@ -264,17 +264,12 @@ Setting `LOCK_FILE` (or `SBOM_FILE`) to `none` creates an empty SBOM and injects
 
 When uploading to Dependency Track (`UPLOAD_DESTINATIONS=dependency-track`), configure with `DTRACK_*` prefixed environment variables:
 
-| Variable                | Required | Description                                                              |
-| ----------------------- | -------- | ------------------------------------------------------------------------ |
-| `DTRACK_API_KEY`        | Yes      | Dependency Track API key                                                 |
-| `DTRACK_API_URL`        | Yes      | Full API base URL (e.g., `https://dtrack.example.com/api`)               |
-| `DTRACK_PROJECT_ID`     | §        | Project UUID (alternative to using `COMPONENT_NAME`/`COMPONENT_VERSION`) |
-| `DTRACK_AUTO_CREATE`    | No       | Auto-create project if it doesn't exist (default: false)                 |
-| `DTRACK_PROJECT_TAGS`   | No       | Tags to add to the project (comma seperated)                             |
-| `DTRACK_PARENT_ID`      | No       | Id of the parent project                                                 |
-| `DTRACK_PARENT_NAME`    | No       | Name of the parent project                                               |
-| `DTRACK_PARENT_VERSION` | No       | Version of the parent project                                            |
-| `DTRACK_IS_LATEST`      | No       | Mark the uploaded BOM as the latest version (default: false)             |
+| Variable             | Required | Description                                                              |
+| -------------------- | -------- | ------------------------------------------------------------------------ |
+| `DTRACK_API_KEY`     | Yes      | Dependency Track API key                                                 |
+| `DTRACK_API_URL`     | Yes      | Full API base URL (e.g., `https://dtrack.example.com/api`)               |
+| `DTRACK_PROJECT_ID`  | §        | Project UUID (alternative to using `COMPONENT_NAME`/`COMPONENT_VERSION`) |
+| `DTRACK_AUTO_CREATE` | No       | Auto-create project if it doesn't exist (default: false)                 |
 
 § Either `DTRACK_PROJECT_ID` **or** both `COMPONENT_NAME` and `COMPONENT_VERSION` are required
 
@@ -294,10 +289,6 @@ When uploading to Dependency Track (`UPLOAD_DESTINATIONS=dependency-track`), con
     DTRACK_API_KEY: ${{ secrets.DTRACK_API_KEY }}
     DTRACK_API_URL: https://dtrack.example.com/api
     DTRACK_AUTO_CREATE: true
-    DTRACK_IS_LATEST: true
-    DTRACK_PROJECT_TAGS: nightly,alpine
-    DTRACK_PARENT_NAME: parent-example
-    DTRACK_PARENT_VERSION: 1.0.0
     ENRICH: true
 ```
 
@@ -354,15 +345,15 @@ sbomify-action --token $SBOMIFY_TOKEN \
   --release "my-product:1.0.0"
 ```
 
-| Option                    | Required | Description                                                     |
-| ------------------------- | -------- | --------------------------------------------------------------- |
-| `SBOM_INPUT` (positional) | Yes      | Path to `.spdx.tar.zst` or `.tar.gz` archive                    |
-| `--token` (root option)   | Yes      | sbomify API token (pass before `yocto`, or set `TOKEN` env var) |
-| `--release`               | Yes      | Product release in `product_id:version` format                  |
-| `--augment/--no-augment`  | No       | Run augmentation per SBOM (default: off)                        |
-| `--enrich/--no-enrich`    | No       | Run enrichment per SBOM (default: off)                          |
-| `--dry-run`               | No       | Show what would happen without making API calls                 |
-| `--verbose`               | No       | Enable verbose logging                                          |
+| Option | Required | Description |
+| --- | --- | --- |
+| `SBOM_INPUT` (positional) | Yes | Path to `.spdx.tar.zst` or `.tar.gz` archive |
+| `--token` (root option) | Yes | sbomify API token (pass before `yocto`, or set `TOKEN` env var) |
+| `--release` | Yes | Product release in `product_id:version` format |
+| `--augment/--no-augment` | No | Run augmentation per SBOM (default: off) |
+| `--enrich/--no-enrich` | No | Run enrichment per SBOM (default: off) |
+| `--dry-run` | No | Show what would happen without making API calls |
+| `--verbose` | No | Enable verbose logging |
 
 **How it works:**
 
@@ -409,9 +400,11 @@ Create `sbomify.json` in your project root to provide augmentation metadata:
   "supplier": {
     "name": "My Company",
     "url": ["https://example.com"],
-    "contacts": [{ "name": "Support", "email": "support@example.com" }]
+    "contacts": [{"name": "Support", "email": "support@example.com"}]
   },
-  "authors": [{ "name": "John Doe", "email": "john@example.com" }],
+  "authors": [
+    {"name": "John Doe", "email": "john@example.com"}
+  ],
   "licenses": ["MIT"],
   "security_contact": "https://example.com/.well-known/security.txt",
   "release_date": "2024-06-15",
@@ -612,12 +605,9 @@ Operating system components (CycloneDX `type: operating-system`) are enriched wi
   "name": "debian",
   "version": "12.12",
   "properties": [
-    {
-      "name": "cdx:lifecycle:milestone:generalAvailability",
-      "value": "2023-06-10"
-    },
-    { "name": "cdx:lifecycle:milestone:endOfSupport", "value": "2026-06-10" },
-    { "name": "cdx:lifecycle:milestone:endOfLife", "value": "2028-06-30" }
+    {"name": "cdx:lifecycle:milestone:generalAvailability", "value": "2023-06-10"},
+    {"name": "cdx:lifecycle:milestone:endOfSupport", "value": "2026-06-10"},
+    {"name": "cdx:lifecycle:milestone:endOfLife", "value": "2028-06-30"}
   ]
 }
 ```
@@ -961,7 +951,7 @@ Generators are tried in priority order. Native tools (optimized for specific eco
 | 10       | **cyclonedx-py**    | Python only                                                                                                    | CycloneDX 1.0–1.7               |
 | 10       | **cargo-cyclonedx** | Rust only                                                                                                      | CycloneDX 1.4–1.6               |
 | 20       | **cdxgen**          | Python, JavaScript, **Java/Gradle**, Go, Rust, Ruby, Dart, C++, PHP, .NET, Swift, Elixir, Scala, Docker images | CycloneDX 1.4–1.7               |
-| ~~30~~   | ~~**Trivy**~~       | ~~Temporarily disabled due to security vulnerabilities~~                                                       | ~~CycloneDX 1.6, SPDX 2.3~~     |
+| ~~30~~   | ~~**Trivy**~~       | ~~Temporarily disabled due to security vulnerabilities~~                                                        | ~~CycloneDX 1.6, SPDX 2.3~~     |
 | 35       | **Syft**            | Python, JavaScript, Go, Rust, Ruby, Dart, C++, PHP, .NET, Swift, Elixir, Terraform, Docker images              | CycloneDX 1.2–1.6, SPDX 2.2–2.3 |
 
 #### How It Works
@@ -988,13 +978,13 @@ Generated SBOMs are validated against their JSON schemas before output.
 
 When installed via pip, sbomify-action requires external SBOM generators. The Docker image includes all tools pre-installed.
 
-| Tool             | Install Command                                                                   | Notes                                                                                                                          |
-| ---------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **cyclonedx-py** | `pip install cyclonedx-bom`                                                       | Native Python generator; `cyclonedx-py` is the CLI command provided by the `cyclonedx-bom` package (installed as a dependency) |
-| **Syft**         | [Installation guide](https://github.com/anchore/syft#installation)                | macOS: `brew install syft`                                                                                                     |
-| **cdxgen**       | `npm install -g @cyclonedx/cdxgen`                                                | Requires Node.js/Bun                                                                                                           |
-| **crane**        | [Installation guide](https://github.com/google/go-containerregistry#installation) | Required for Chainguard image detection; macOS: `brew install crane`                                                           |
-| **cosign**       | [Installation guide](https://github.com/sigstore/cosign#installation)             | Required for Chainguard SBOM retrieval; macOS: `brew install cosign`                                                           |
+| Tool             | Install Command                                                                                 | Notes                                                                                                                          |
+| ---------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **cyclonedx-py** | `pip install cyclonedx-bom`                                                                     | Native Python generator; `cyclonedx-py` is the CLI command provided by the `cyclonedx-bom` package (installed as a dependency) |
+| **Syft**         | [Installation guide](https://github.com/anchore/syft#installation)                              | macOS: `brew install syft`                                                                                                     |
+| **cdxgen**       | `npm install -g @cyclonedx/cdxgen`                                                              | Requires Node.js/Bun                                                                                                           |
+| **crane**        | [Installation guide](https://github.com/google/go-containerregistry#installation)               | Required for Chainguard image detection; macOS: `brew install crane`                                                           |
+| **cosign**       | [Installation guide](https://github.com/sigstore/cosign#installation)                           | Required for Chainguard SBOM retrieval; macOS: `brew install cosign`                                                           |
 
 **Minimum requirement**: At least one generator must be installed for SBOM generation. For Python projects, `cyclonedx-bom` (which provides the `cyclonedx-py` command) is installed as a dependency when you install sbomify-action via pip. For other ecosystems or Docker images, install `syft` or `cdxgen`.
 
@@ -1028,11 +1018,11 @@ After sbomify enrichment, the same component includes supplier, license, and ref
   "purl": "pkg:pypi/django@5.1",
   "publisher": "Django Software Foundation",
   "description": "A high-level Python web framework...",
-  "licenses": [{ "expression": "BSD-3-Clause" }],
+  "licenses": [{"expression": "BSD-3-Clause"}],
   "externalReferences": [
-    { "type": "website", "url": "https://www.djangoproject.com/" },
-    { "type": "vcs", "url": "https://github.com/django/django" },
-    { "type": "distribution", "url": "https://pypi.org/project/Django/" }
+    {"type": "website", "url": "https://www.djangoproject.com/"},
+    {"type": "vcs", "url": "https://github.com/django/django"},
+    {"type": "distribution", "url": "https://pypi.org/project/Django/"}
   ]
 }
 ```
