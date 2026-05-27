@@ -90,7 +90,8 @@ class DestinationConfig(ABC):
         value = cls._get_env(key)
         if value is None or value.strip() == "":
             return [] if default is None else default
-        return value.split(',')
+        return [t.strip() for t in value.split(",") if t.strip()]
+
 
 class Destination(Protocol):
     """

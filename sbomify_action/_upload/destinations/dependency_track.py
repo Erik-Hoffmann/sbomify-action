@@ -79,7 +79,11 @@ class DependencyTrackConfig(DestinationConfig):
             return None
 
         # map list of tags to list[dict{name: tag}]
-        _project_tags = [{"name": t} for t in cls._get_env_list("PROJECT_TAGS")]
+        _project_tags = (
+            [{"name": t} for t in cls._get_env_list("PROJECT_TAGS")]
+            if cls._get_env("PROJECT_TAGS") is not None
+            else None
+        )
 
         return cls(
             api_key=api_key,
@@ -92,7 +96,7 @@ class DependencyTrackConfig(DestinationConfig):
             parent_id=cls._get_env("PARENT_ID"),
             parent_name=cls._get_env("PARENT_NAME"),
             parent_version=cls._get_env("PARENT_VERSION"),
-            is_latest=cls._get_env_bool("IS_LATEST", default=False)
+            is_latest=cls._get_env_bool("IS_LATEST", default=False),
         )
 
     def is_configured(self) -> bool:
@@ -201,11 +205,7 @@ class DependencyTrackDestination:
         payload: Dict[str, Any] = {
             "bom": bom_base64,
             "autoCreate": self._config.auto_create,
-            "projectTags": [] if self._config.project_tags is None else self._config.project_tags,
-            "parentUUID": self._config.parent_id,
-            "parentName": self._config.parent_name,
-            "parentVersion": self._config.parent_version,
-            "isLatest": self._config.is_latest
+            "isLatest": self._config.is_latest,
         }
 
         # Add project identifier
@@ -223,6 +223,17 @@ class DependencyTrackDestination:
                     "Dependency Track requires either DTRACK_PROJECT_ID or both COMPONENT_NAME and COMPONENT_VERSION"
                 ),
             )
+
+        # add project tags if set
+        if self._config.project_tags is not None:
+            payload["projectTags"] = self._config.project_tags
+
+        # ensure parent settings are coherent
+        if self._config.parent_id:
+            payload["parentUUID"] = self._config.parent_id
+        elif self._config.parent_name and self._config.parent_version:
+            payload["parentName"] = self._config.parent_name
+            payload["parentVersion"] = self._config.parent_version
 
         # Execute the upload
         try:
