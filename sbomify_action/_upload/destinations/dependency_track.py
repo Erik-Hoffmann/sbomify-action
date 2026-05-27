@@ -24,7 +24,7 @@ environment variables, not from DTRACK_* prefixed variables.
 import base64
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 
 import requests
 
@@ -62,7 +62,7 @@ class DependencyTrackConfig(DestinationConfig):
     api_url: str  # Full API base URL, we append /v1/bom
     project_id: Optional[str] = None
     auto_create: bool = False
-    project_tags: List[dict] = None
+    project_tags: list[dict] | None = None
     parent_id: Optional[str] = None
     parent_name: Optional[str] = None
     parent_version: Optional[str] = None

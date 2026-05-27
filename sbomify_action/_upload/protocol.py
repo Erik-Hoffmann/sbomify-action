@@ -85,7 +85,7 @@ class DestinationConfig(ABC):
         return value.lower() in ("true", "yes", "1", "on")
 
     @classmethod
-    def _get_env_list(cls, key: str, default: list = None) -> list:
+    def _get_env_list(cls, key: str, default: list | None = None) -> list:
         """Get list environment variable with prefix."""
         value = cls._get_env(key)
         if value is None or value.strip() == "":
