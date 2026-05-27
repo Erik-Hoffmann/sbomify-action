@@ -79,9 +79,7 @@ class DependencyTrackConfig(DestinationConfig):
             return None
 
         # map list of tags to list[dict{name: tag}]
-        _project_tags = list(map(
-            lambda t: {"name": t}, cls._get_env_list("PROJECT_TAGS")
-        ))
+        _project_tags = [{"name": t} for t in cls._get_env_list("PROJECT_TAGS")]
 
         return cls(
             api_key=api_key,
